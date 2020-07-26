@@ -2,21 +2,13 @@ const router = require('express').Router();
 
 const User = require('../models/User');
 
-const Joi = require('@hapi/joi');
+const { validateUserForSignUp, validateUserForLogin} = require('../validations/validations');
 
-function validateUser(user){
-    const validateUserSchema = Joi.object({
-        name: Joi.string().min(6).required(),
-        email: Joi.string().min(6).required().email(),
-        password: Joi.string().min(6).required()
-    })
 
-    return validateUserSchema.validate(user)
-}
-
+// @ROUTE a post route to handle incoming post request
 router.post('/register', async (req,res) => {
     // validate the userdata
-    const UserValidationResponse = validateUser(req.body);
+    const UserValidationResponse = validateUserForSignUp(req.body);
 
     if (UserValidationResponse.error) return res.status(400).json({
         success: false,
