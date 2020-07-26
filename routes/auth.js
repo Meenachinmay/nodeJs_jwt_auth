@@ -39,8 +39,29 @@ router.post('/register', async (req,res) => {
     }
 });
 
-router.post('/login', (req, res) => {
-    res.send("Login user");
+router.post('/login', async (req, res) => {
+    // validate the userdata
+    const UserValidationResponse = validateUserForLogin(req.body);
+
+    if (UserValidationResponse.error) return res.status(400).json({
+        success: false,
+        error: UserValidationResponse.error.details[0].message
+    })
+
+    // IF EMAIL EXIST
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+        return res.status(400).json({success: false, message: "Email is not found in our database."});
+    } else {
+        // IF PASSWORD IS CORRECT
+        const passwordMatched = await bcrypt.compare(req.body.password, user.password);
+        if (!passwordMatched) {
+            return res.status(400).json({success: false, message: "Password is incorrect."});
+        } else {
+            return res.status(200).json({success: true, message: "Logged in"});
+        }
+    }
 })
 
 module.exports = router;
