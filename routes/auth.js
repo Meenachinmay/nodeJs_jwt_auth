@@ -2,10 +2,9 @@ const router = require('express').Router();
 
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-
+const jwt = require('jsonwebtoken');
 
 const { validateUserForSignUp, validateUserForLogin} = require('../validations/validations');
-
 
 // @ROUTE a post route to handle incoming post request
 router.post('/register', async (req,res) => {
@@ -59,7 +58,8 @@ router.post('/login', async (req, res) => {
         if (!passwordMatched) {
             return res.status(400).json({success: false, message: "Password is incorrect."});
         } else {
-            return res.status(200).json({success: true, message: "Logged in"});
+            const token = jwt.sign({_id: user._id}, "nihongadaisuki");
+            return res.header('auth_token', token).status(200).json({token: token});
         }
     }
 })
